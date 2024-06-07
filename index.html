@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brands Kontakte</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: black; /* Hintergrundfarbe des Körpers */
+            color: white; /* Textfarbe des Körpers */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            color: black; /* Textfarbe der Tabelle */
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        input[type="text"], input[type="number"] {
+            width: 150px; /* Größere Breite für Textfelder */
+            padding: 5px;
+        }
+        input[type="number"] {
+            width: 100px; /* Kleinere Breite für Preis und Endpreis */
+            -moz-appearance: textfield; /* Entfernt Pfeile in Firefox */
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none; /* Entfernt Pfeile in Webkit-Browsern */
+            margin: 0;
+        }
+        #rabatt {
+            width: 50px; /* Noch kleinere Breite für Rabatt */
+        }
+        #endpreis {
+            width: 200px; /* Größere Breite für Endpreis */
+        }
+        #searchInput, #mobileSearchInput {
+            width: 300px; /* Größere Breite für die Suchleiste */
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        button {
+            margin: 5px;
+        }
+        .mobile-only {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .desktop-only {
+                display: none;
+            }
+            .mobile-only {
+                display: block;
+                background-color: white;
+                color: black;
+                padding: 10px;
+                margin-bottom: 10px;
+                border: 1px solid black;
+            }
+            .mobile-only div {
+                margin-bottom: 5px;
+            }
+            #searchInput {
+                display: none;
+            }
+            #mobileSearchInput {
+                display: block;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Brands Kontakte</h1>
+    <div class="desktop-only">
+        <input type="text" id="searchInput" placeholder="Suchen..." oninput="searchTable()">
+        <table id="brandsTable">
+            <thead>
+                <tr>
+                    <th>Marke</th>
+                    <th>Artikelnummer</th>
+                    <th>Kontakt</th>
+                    <th>Kontaktperson</th>
+                    <th>Preis (€)</th>
+                    <th>Rabatt (%)</th>
+                    <th>Endpreis (€)</th>
+                    <th>Aktion</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="text" id="marke"></td>
+                    <td><input type="text" id="artikelnummer"></td>
+                    <td><input type="text" id="kontakt"></td>
+                    <td><input type="text" id="kontaktperson"></td>
+                    <td><input type="number" id="preis"></td>
+                    <td><input type="number" id="rabatt"></td>
+                    <td><span id="endpreis"></span></td>
+                    <td><button onclick="addProduct()">Produkt hinzufügen</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="mobileViewContainer" class="mobile-only">
+        <input type="text" id="mobileSearchInput" placeholder="Suchen..." oninput="searchMobile()">
+    </div>
+
+    <script>
+        const products = [];
+
+        function addProduct() {
+            const marke = document.getElementById('marke').value;
+            const artikelnummer = document.getElementById('artikelnummer').value;
+            const kontakt = document.getElementById('kontakt').value;
+            const kontaktperson = document.getElementById('kontaktperson').value;
+            const preis = parseFloat(document.getElementById('preis').value);
+            const rabatt = parseFloat(document.getElementById('rabatt').value);
+            const endpreis = preis - (preis * rabatt / 100);
+
+            const product = { marke, artikelnummer, kontakt, kontaktperson, preis, rabatt, endpreis };
+            products.push(product);
+
+            addProductToTable(product);
+            addToMobileView(product);
+            clearInputFields();
+        }
+
+        function addProductToTable(product) {
+            const table = document.getElementById('brandsTable').getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow();
+            newRow.innerHTML = `
+                <td contenteditable="true">${product.marke}</td>
+                <td contenteditable="true">${product.artikelnummer}</td>
+                <td contenteditable="true">${product.kontakt}</td>
+                <td contenteditable="true">${product.kontaktperson}</td>
+                <td contenteditable="true">${product.preis.toFixed(2)} €</td>
+                <td contenteditable="true">${product.rabatt}%</td>
+                <td contenteditable="true">${product.endpreis.toFixed(2)} €</td>
+                <td><button onclick="deleteRow(this)">Löschen</button></td>`;
+        }
+
+        function addToMobileView(product) {
+            const container = document.getElementById('mobileViewContainer');
+            const item = document.createElement('div');
+            item.className = 'mobile-view-item';
+            item.innerHTML = `
+                <div><strong>Marke:</strong> ${product.marke}</div>
+                <div><strong>Artikelnummer:</strong> ${product.artikelnummer}</div>
+                <div><strong>Kontakt:</strong> ${product.kontakt}</div>
+                <div><strong>Kontaktperson:</strong> ${product.kontaktperson}</div>
+                <div><strong>Preis:</strong> ${product.preis.toFixed(2)} €</div>
+                <div><strong>Rabatt:</strong> ${product.rabatt}%</div>
+                <div><strong>Endpreis:</strong> ${product.endpreis.toFixed(2)} €</div>`;
+            container.appendChild(item);
+        }
+
+        function clearInputFields() {
+            document.getElementById('marke').value = '';
+            document.getElementById('artikelnummer').value = '';
+            document.getElementById('kontakt').value = '';
+            document.getElementById('kontaktperson').value = '';
+            document.getElementById('preis').value = '';
+            document.getElementById('rabatt').value = '';
+        }
+
+        function deleteRow(button) {
+            const row = button.parentNode.parentNode;
+            const index = Array.prototype.indexOf.call(row.parentNode.children, row);
+            products.splice(index - 1, 1);
+            row.parentNode.removeChild(row);
+        }
+
+        function searchTable() {
+            const filter = document.getElementById("searchInput").value.toLowerCase();
+            const table = document.getElementById("brandsTable");
+            const tr = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < tr.length; i++) {
+                tr[i].style.display = "none";
+                const td = tr[i].getElementsByTagName("td");
+                for (let j = 0; j < td.length; j++) {
+                    if (td[j]) {
+                        const txtValue = td[j].textContent || td[j].innerText;
+                        if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                            tr[i].style.display = "";
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        function searchMobile() {
+            const filter = document.getElementById("mobileSearchInput").value.toLowerCase();
+            const items = document.getElementsByClassName('mobile-view-item');
+
+            for (let i = 0; i < items.length; i++) {
+                items[i].style.display = "none";
+                const fields = items[i].getElementsByTagName('div');
+                for (let j = 0; j < fields.length; j++) {
+                    const txtValue = fields[j].textContent || fields[j].innerText;
+                    if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                        items[i].style.display = "block";
+                        break;
+                    }
+                }
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            loadProducts();
+        });
+    </script>
+</body>
+</html>
